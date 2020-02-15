@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"mapreduce"
 	"os"
+	"strconv"
+	"strings"
+	"unicode"
 )
 
 //
@@ -15,6 +18,31 @@ import (
 //
 func mapF(filename string, contents string) []mapreduce.KeyValue {
 	// Your code here (Part II).
+
+	//单词频率结果
+	wordsKv := make(map[string]int)
+	//分词并遍历
+	words := strings.FieldsFunc(contents, func(r rune) bool {
+		return !unicode.IsLetter(r)
+	})
+	for _, word := range words {
+		//统计单词
+		if _, ok := wordsKv[word]; ok {
+			wordsKv[word]++
+		} else {
+			wordsKv[word] = 1
+		}
+	}
+	//转换为输出格式
+	var rst []mapreduce.KeyValue
+	for key, value := range wordsKv {
+		kv := mapreduce.KeyValue{
+			key,
+			strconv.Itoa(value),
+		}
+		rst = append(rst, kv)
+	}
+	return rst
 }
 
 //
@@ -24,6 +52,16 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 //
 func reduceF(key string, values []string) string {
 	// Your code here (Part II).
+	cnt := 0
+    //合并统计结果
+	for _, value := range values {
+		num, err := strconv.Atoi(value)
+		if err != nil {
+			break
+		}
+		cnt += num
+	}
+	return strconv.Itoa(cnt)
 }
 
 // Can be run in 3 ways:
