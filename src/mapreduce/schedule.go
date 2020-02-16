@@ -28,16 +28,12 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 
 	// All ntasks tasks have to be scheduled on workers. Once all tasks
 	// have completed successfully, schedule() should return.
-	//
-	// Your code here (Part III, Part IV).
-	//
-	//设置等待任务数量
 	var wg sync.WaitGroup
 	wg.Add(ntasks)
-	//运行协程并行执行任务
+
 	for i := 0; i < ntasks; i++ {
 		go func(index int) {
-			//rpc调用参数
+			//rpc call args
 			var args DoTaskArgs
 			args.Phase = phase
 			args.JobName = jobName
@@ -48,17 +44,16 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 			}
 
 			done := false
-			for ;!done;{
+			for !done {
+				// registerChan yields a stream of registered workers
 				worker := <-registerChan
 				done = call(worker, "Worker.DoTask", args, nil)
-				go func(){registerChan <- worker  }()
+				go func(){ registerChan <- worker }()
 			}
-					
-			//任务完成
 			wg.Done()
 		}(i)
 	}
-	//等待所有任务完成
+
 	wg.Wait()
 	fmt.Printf("Schedule: %v done\n", phase)
 }

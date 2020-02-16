@@ -28,7 +28,7 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 		_, ok := wordsKv[word]
 		if ok { 
 			wordsKv[word]++ 
-		} else { 
+		} else {  
 			wordsKv[word] = 1 
 		}
 	}
